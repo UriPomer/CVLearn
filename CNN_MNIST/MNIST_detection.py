@@ -1,8 +1,8 @@
-# main.py
+# CIFAR.py
 import torch
 
-from training.train import train_model
 from evaluation.evaluate import evaluate_model, draw_train_process
+from training.train import train_model
 
 
 def main():

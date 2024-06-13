@@ -1,8 +1,9 @@
 # evaluation/evaluate.py
-import torch
 import matplotlib.pyplot as plt
-from CNN_MNIST.utils.data_loader import get_data_loaders
+import torch
+
 from CNN_MNIST.CNN import CNN
+from CNN_MNIST.utils.data_loader import get_data_loaders
 
 
 def draw_train_process(title, iters, costs, accs, label_cost, label_acc):

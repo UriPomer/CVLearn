@@ -1,8 +1,9 @@
 # training/train.py
 import torch
 import torch.optim as optim
-from CNN_MNIST.utils.data_loader import get_data_loaders
+
 from CNN_MNIST.CNN import CNN
+from CNN_MNIST.utils.data_loader import get_data_loaders
 
 
 def train_model(num_epochs=3):
@@ -12,7 +13,7 @@ def train_model(num_epochs=3):
     net = net.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.SGD(net.parameters(), learning_rate=0.001, momentum=0.9)
 
     train_accs = []
     train_loss = []
