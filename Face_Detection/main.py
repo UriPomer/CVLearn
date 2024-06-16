@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 face_classifier = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 )
+print(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 
 def detect_bounding_box(image):
