@@ -9,41 +9,29 @@ from tensorflow.keras import layers
 import time
 from models.models import make_generator_model, make_discriminator_model
 from IPython import display
-
-
-def check_gpu():
-    physical_devices = tf.config.list_physical_devices('GPU')
-    if physical_devices:
-        print("GPU is available")
-    else:
-        print("GPU is not available")
-
+from utils.checkgpu import check_gpu
+from utils.dataloader import load_data
 
 check_gpu()
 
-(train_images, train_labels), (_, _) = tf.keras.datasets.mnist.load_data()
-train_images = train_images.reshape(train_images.shape[0], 28, 28, 1).astype('float32')
-train_images = (train_images - 127.5) / 127.5  # Normalize the images to [-1, 1]
+EPOCHS = 20
+noise_dim = 100
+num_examples_to_generate = 16
 BUFFER_SIZE = 60000
 BATCH_SIZE = 256
-# Batch and shuffle the data
-train_dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 
-generator = make_generator_model()
+train_dataset = load_data(BATCH_SIZE, BATCH_SIZE)
+generator = make_generator_model()  # 生成器
+discriminator = make_discriminator_model()  # 判别器
 
 noise = tf.random.normal([1, 100])
-generated_image = generator(noise, training=False)
-
-plt.imshow(generated_image[0, :, :, 0], cmap='gray')
-plt.show()
-discriminator = make_discriminator_model()
-decision = discriminator(generated_image)
-print(decision)
+noise_image = generator(noise, training=False)
 
 # This method returns a helper function to compute cross entropy loss
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
 
+# 判别器损失
 def discriminator_loss(real_output, fake_output):
     real_loss = cross_entropy(tf.ones_like(real_output), real_output)
     fake_loss = cross_entropy(tf.zeros_like(fake_output), fake_output)
@@ -51,12 +39,13 @@ def discriminator_loss(real_output, fake_output):
     return total_loss
 
 
+# 生成器损失
 def generator_loss(fake_output):
     return cross_entropy(tf.ones_like(fake_output), fake_output)
 
 
-generator_optimizer = tf.keras.optimizers.Adam(1e-4)
-discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
+generator_optimizer = tf.keras.optimizers.Adam(1e-4)  # 生成器优化器
+discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)  # 判别器优化器
 
 checkpoint_dir = './training_checkpoints'
 checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
@@ -65,13 +54,8 @@ checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  generator=generator,
                                  discriminator=discriminator)
 
-EPOCHS = 20
-noise_dim = 100
-num_examples_to_generate = 16
-
-# You will reuse this seed overtime (so it's easier)
 # to visualize progress in the animated GIF)
-seed = tf.random.normal([num_examples_to_generate, noise_dim])
+seed = tf.random.normal([num_examples_to_generate, noise_dim])  # 生成噪声
 
 
 # Notice the use of `tf.function`
